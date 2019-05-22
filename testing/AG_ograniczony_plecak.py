@@ -3,6 +3,82 @@ import collections
 import string
 import matplotlib.pyplot as plt
 
+from copy import copy
+
+"""
+Zarys architektury który powinieneś zrobić dla przejrzystości
+"""
+# class Item:
+#
+#     def __init__(self, name, weigth, value):
+#         self.name = name
+#         self.weigth = weigth
+#         self.value = value
+#
+#
+# def generate_item_list():
+#     data = [
+#         ("map", 9, 150),
+#         ("compass", 13, 35),
+#         ("water", 153, 200),
+#         ("water", 153, 200),
+#         ("water", 153, 200),
+#         ("sandwich", 50, 60),
+#         ("sandwich", 50, 60),
+#         ("glucose", 15, 60),
+#         ("glucose", 15, 60),
+#         ("tin", 68, 45),
+#         ("tin", 68, 45),
+#         ("tin", 68, 45),
+#         ("banana", 27, 60),
+#         ("banana", 27, 60),
+#         ("banana", 27, 60),
+#         ("apple", 39, 40),
+#         ("apple", 39, 40),
+#         ("apple", 39, 40),
+#         ("cheese", 23, 30),
+#         ("beer", 52, 10),
+#         ("beer", 52, 10),
+#         ("beer", 52, 10),
+#         ("suntan cream", 11, 70),
+#         ("camera", 32, 30),
+#         ("t-shirt", 24, 15),
+#         ("t-shirt", 24, 15),
+#         ("trousers", 48, 10),
+#         ("trousers", 48, 10),
+#         ("umbrella", 73, 40),
+#         ("waterproof trousers", 42, 70),
+#         ("waterproof overclothes", 43, 75),
+#         ("note-case", 22, 80),
+#         ("sunglasses", 7, 20),
+#         ("towel", 18, 12),
+#         ("towel", 18, 12),
+#         ("socks", 4, 50)
+#     ]
+#
+#     items = []
+#     for i in data:
+#         items.append(Item(i[0], i[1], i[2]))
+#
+#     return items
+#
+#
+# class Chromosome:
+#
+#     def __init__(self, list_of_items):
+#         self.list_of_items = list_of_items
+#         self.total_weights = 0
+#         self.total_values = 0
+#
+#     def calculate_weigths_and_values(self):
+#         for item in self.list_of_items:
+#             self.total_values += item.value
+#             self.total_weights += item.weigth
+#
+#     def __str__(self):
+#         return "Items: {0}\n Total weight: {1}\n Total value: {2}".format(self.list_of_items,
+#                                                                           self.total_weights, self.total_values)
+
 
 # przedmioty, wagi, wartosci
 def items_list():
@@ -47,7 +123,7 @@ def items_list():
     random.shuffle(items)
     list_of_weight = [weight[1] for weight in items]
     list_of_value = [value[2] for value in items]
-
+    
     return items, list_of_weight, list_of_value
 
 
@@ -64,13 +140,13 @@ def items_generator(items_quantity, min_w, max_w, min_v, max_v, max_it):
         random_weight = random.randint(min_w, max_w)
         random_value = random.randint(min_v, max_v)
         random_quantity = random.randint(1, max_it)
-
+        
         for j in range(random_quantity):
             items_list.append((random_name, random_weight, random_value))
-
+    
     list_of_weight = [weight[1] for weight in items_list]
     list_of_value = [value[2] for value in items_list]
-
+    
     return items_list, list_of_weight, list_of_value
 
 
@@ -102,7 +178,7 @@ def random_population(size_population, items_size):
     len_of_items = items_size
     list_of_full_population = [checking_backpack(random_chromosome(len_of_items)) for each_element in
                                range(size_population)]
-
+    
     return list_of_full_population
 
 
@@ -113,16 +189,14 @@ def fitness_function(population, max_weight):
     :param max_weight:
     :return:
     '''
-    list_of_full_population = population[:]
+    list_of_full_population = copy(population)  # to sprawi że jak usuniesz populacje nie usuniesz listy
     population_lower_than_weights = []
     for index in range(len(list_of_full_population)):
         if list_of_full_population[index][1][0] <= max_weight:
             population_lower_than_weights.append(list_of_full_population[index])
-
-    # x = sorted(population_lower_than_weights, key=lambda by_value: by_value[1][1], reverse=True)
-    x = population_lower_than_weights
-
-    return x
+    
+    # return sorted(population_lower_than_weights, key=lambda by_value: by_value[1][1], reverse=True)
+    return population_lower_than_weights
 
 
 def fitness_function_modified(population, max_weight):
@@ -137,10 +211,10 @@ def fitness_function_modified(population, max_weight):
     for index in range(len(list_of_full_population)):
         if list_of_full_population[index][1][0] <= max_weight:
             population_lower_than_weights.append(list_of_full_population[index])
-
+    
     # x = sorted(population_lower_than_weights, key=lambda by_value: by_value[1][1], reverse=True)
     x = population_lower_than_weights
-
+    
     return x
 
 
@@ -156,7 +230,7 @@ def selection_stage_one(population):
     chromosome_stage_one = sorted_fitness_pop[:stage_one]
     # print(chromosome_stage_one)
     remaining_population = sorted_fitness_pop[stage_one:]
-
+    
     return chromosome_stage_one, remaining_population
 
 
@@ -171,9 +245,9 @@ def selection_stage_two(remaining_population):
     # chromosome_stage_two = remaining_population_second[:stage_two]
     # remaining_population_second = remaining_population_second[stage_two:]
     chromosome_stage_two = random.sample(remaining_population_second,
-    									 k=int(len(remaining_population_second) * (33 / 100)))
+                                         k=int(len(remaining_population_second) * (33 / 100)))
     [remaining_population_second.remove(chromosome_stage_two[i]) for i in range(len(chromosome_stage_two))]
-
+    
     return chromosome_stage_two, remaining_population_second
 
 
@@ -221,7 +295,7 @@ def crossing_version_1(x, y):
     '''
     cross_point = random.randint(1, len(x[0]) - 1)
     crossed = x[0][:cross_point] + y[0][cross_point:]
-
+    
     return crossed
 
 
@@ -237,22 +311,22 @@ def crossover_v1(list_of_chromosome, crossover_chance):
     '''
     list_of_chromosome_copy = list_of_chromosome[:]
     crossover_chance_0_1 = [1 if random.random() < crossover_chance else 0 for i in range(len(list_of_chromosome_copy))]
-
+    
     new_list_to_crossover = [list_of_chromosome_copy[index] for index in range(len(list_of_chromosome_copy)) if
                              crossover_chance_0_1[index] == 1]
-
+    
     list_of_crossover_pairs = random.choices(list_of_chromosome_copy, k=len(new_list_to_crossover))
-
+    
     [list_of_chromosome_copy.remove(new_list_to_crossover[i]) for i in range(len(new_list_to_crossover))]
-
+    
     finally_list_crossed = [
         crossing_version_1(new_list_to_crossover[each_chromosome], list_of_crossover_pairs[each_chromosome])
         for each_chromosome in range(len(new_list_to_crossover))]
-
+    
     finally_list_crossed_calculated = [checking_backpack(each_chromosome) for each_chromosome in finally_list_crossed]
-
+    
     list_of_chromosome_copy.extend(finally_list_crossed_calculated)
-
+    
     return list_of_chromosome_copy
 
 
@@ -285,9 +359,9 @@ def mutations(population, mutation_chance):
     '''
     population_copy = population[:]
     finally_mutated_list = [mutating(each_chromosome, mutation_chance) for each_chromosome in population_copy]
-
+    
     finally_list_mutated_calculated = [checking_backpack(each_chromosome) for each_chromosome in finally_mutated_list]
-
+    
     return finally_list_mutated_calculated
 
 
@@ -315,7 +389,7 @@ def counting_items(data):
     :return:
     '''
     result = collections.Counter(data[:-1])
-
+    
     return result, data[-1]
 
 
@@ -329,7 +403,7 @@ def crossing_version_2(to_cross):
     to_cross_copy = to_cross[:]
     children_1 = []
     crossed_chromosome = []
-
+    
     for elem in to_cross_copy:
         for j in range(len(elem[0])):
             children_1.append(elem[0][j])
@@ -339,11 +413,35 @@ def crossing_version_2(to_cross):
         children_1 = children_1[int(len(children_1) / 2):]
         crossed_chromosome.append(children_2)
         crossed_chromosome.append(children_1)
-
+        
         children_1, children_2 = [], []
-
+    
     return crossed_chromosome
 
+
+def pairwaise(population):
+    aaa = int(len(population)/2)
+    a = population[:aaa]
+    b = population[aaa:]
+    return zip(a, b)
+
+
+def pawel_pro_crossover(population_to_cross, crossover_chance):
+    population_to_cross_copy = copy(population_to_cross)    # nie jestem pewien czy jest to potrzebne
+                                                            # ale powinno się to zrobić tak
+    if len(population_to_cross_copy) % 2 != 0:
+        elem_for_last = population_to_cross_copy.pop()
+        
+    pairs = pairwaise(population_to_cross_copy)
+    
+    cross_point = int(len(population_to_cross_copy)/2)
+    
+    for parent_1, parent_2 in pairs:
+        child_1 = parent_1[0][cross_point:] + parent_2[0][:cross_point]
+        child_1 = parent_1[0][:cross_point] + parent_2[0][cross_point:]
+        
+    ### zostało tylko sprawdzić czy dzieci są dobre
+    ### i zebrać to do kupy
 
 def crossover_version_2(population_to_cross, crossover_chance):
     '''
@@ -356,46 +454,46 @@ def crossover_version_2(population_to_cross, crossover_chance):
     :param crossover_chance:
     :return:
     '''
-
+    
     population_to_cross_copy = population_to_cross[:]
-
+    
     random.shuffle(population_to_cross_copy)
     elem_for_last = 0
     if len(population_to_cross_copy) % 2 != 0:
         elem_for_last = population_to_cross_copy.pop()
-
+    
     pairs_to_cross = []
     pairs_without_calculate = []
     for i in range(len(population_to_cross_copy)):
         pairs_without_calculate.append(population_to_cross_copy[i][0])
-
+    
     random.shuffle(pairs_without_calculate)
     while pairs_without_calculate != []:
         pairs_to_cross.append([pairs_without_calculate.pop(), pairs_without_calculate.pop()])
-
+    
     crossover_chance_0_1 = [1 if random.random() < crossover_chance else 0 for i in range(len(pairs_to_cross))]
-
+    
     pairs_to_cross_chance = []
     for index in range(len(pairs_to_cross)):
         if crossover_chance_0_1[index] == 1:
             pairs_to_cross_chance.append(pairs_to_cross[index])
-
+    
     for id in pairs_to_cross_chance:
         pairs_to_cross.remove(id)
-
+    
     back_from_pair = []
     for i in pairs_to_cross:
         back_from_pair.extend(i)
-
+    
     crossed_chromos = crossing_version_2(pairs_to_cross_chance)
-
+    
     if elem_for_last != 0:
         connect = crossed_chromos + back_from_pair + [elem_for_last[0]]
     else:
         connect = crossed_chromos + back_from_pair
-
+    
     finally_connect_with_calc = [checking_backpack(item) for item in connect]
-
+    
     return finally_connect_with_calc
 
 
@@ -411,17 +509,17 @@ def results_making(return_of_main, max_weight_given):
         elem = fitness_function(each_elem, max_weight_given)
         if elem != []:
             tab_for_our_limit.extend(elem)
-
+    
     best_chromosome = sorted(tab_for_our_limit, key=lambda by_value: by_value[1][1], reverse=True)[0]
     best_with_names = matching_items(best_chromosome, items_lists[:len(best_chromosome[0])])
     finally_items = counting_items(best_with_names)
-
+    
     print(f'ilosc iteracji po ktorych mamy wynik: {iters + 1} \n'
           f'ilość populacji: {population_} \n'
           f'maksymalna waga przedmiotow to: {sum(weights)} \n'
           f'dopuszczalna waga: {max_weight_given} \n'
           f'maksymalna wartosc: {sum(values)} \n')
-
+    
     return finally_items
 
 
@@ -434,42 +532,43 @@ def main(iterations, population, mutation_chance, crossover_chance, max_weight, 
     second = random_population(population, items_size)
     third = fitness_function(second, max_weight)
     result.append(third)
-
+    
     for i in range(iterations):
         # fourth + sixth + nineth
         fourth, fifth = selection_stage_one(third)
         sixth, seventh = selection_stage_two(fifth)
+        aaa = pawel_pro_crossover(seventh, crossover_chance)
         nineth = crossover_version_2(seventh, crossover_chance)
-
+        
         while len(nineth) < len(seventh):
             ten = crossover_version_2(seventh, crossover_chance)
             nineth = ten
-
+        
         connected_selection = nineth + sixth + fourth
         random.shuffle(connected_selection)
         tenth = mutations(connected_selection, mutation_chance)
         third = fitness_function(tenth, max_weight)
-
-        if third == []:
+        
+        if not third:
             break
         result.append(third)
-
+    
     return result, i
 
 
-global items_lists, weights, values
 # items_lists, weights, values = items_generator(items_quantity=15, min_w=10, max_w=50, min_v=10, max_v=150, max_it=4)
 items_lists, weights, values = items_list()
-size_of_items_quantity = len(items_lists)
+count_of_items = len(items_lists)
 
-print(f'ilosc przedmiotow w chromosomie: {size_of_items_quantity}')
+print("ilosc przedmiotow w chromosomie: {}".format(count_of_items))
+
 z = 0
 epocs = 1
 while z < epocs:
     weight_to_set = 400
     population_ = 10000
     something, iters = main(iterations=100, population=population_, mutation_chance=0.05,
-                            crossover_chance=0.5, max_weight=weight_to_set, items_size=size_of_items_quantity)
+                            crossover_chance=0.5, max_weight=weight_to_set, items_size=count_of_items)
     try:
         ss = results_making(something, weight_to_set)
         print(ss[0], '\n', ss[1])
@@ -491,7 +590,7 @@ def plot_making(data):
         v.append(sorted_vector[0][1][1])
         it.append(ii)
         ii += 1
-
+    
     plt.figure(figsize=(18, 8))
     plt.grid()
     plt.plot(it, w, label='waga')
